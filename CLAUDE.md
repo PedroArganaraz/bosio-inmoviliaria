@@ -22,6 +22,7 @@ src/
   app/
     (publico)/         # rutas públicas: "/", "/propiedades", "/contacto"
     admin/              # rutas privadas del panel de administración
+  componentes/          # UI genérica compartida entre funcionalidades (ej. Interruptor)
   configuracion/
     configuracionSitio.ts   # nombre, whatsapp, contacto, redes (placeholders)
   funcionalidades/
@@ -33,12 +34,15 @@ src/
       consultas/        # lecturas a Supabase (Server Components/acciones)
       acciones/          # Server Actions (mutaciones)
       componentes/       # componentes de UI propios de propiedades
+      utilidades/         # etiquetas, formatearPrecio, construirUrlImagen (se
+                           # reutilizan también en el sitio público)
   lib/
     supabase/
       cliente.ts         # cliente de navegador
       servidor.ts         # cliente para Server Components/Server Actions
       sesion.ts            # refresco de sesión, usado desde proxy.ts
       autenticacion.ts      # obtenerUsuarioAdmin(), usado en layouts/acciones del admin
+    revalidarSitioPublico.ts  # único punto que revalida las rutas públicas
   proxy.ts                # (antes "middleware"): refresca la sesión en cada request
   tipos/
     baseDeDatos.ts         # generado con `npm run generarTipos`, no editar a mano
@@ -74,6 +78,8 @@ src/
 - **Autenticación del admin:** todo layout, página y Server Action del admin
   debe llamar a `obtenerUsuarioAdmin()` (`src/lib/supabase/autenticacion.ts`)
   antes de leer o escribir datos. No confiar solo en el proxy.
+- **Orden determinístico:** todo listado debe tener orden total
+  determinístico: criterio principal + desempate por `id`.
 
 ## Tipos de la base de datos
 
