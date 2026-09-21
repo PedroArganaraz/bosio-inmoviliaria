@@ -27,7 +27,7 @@ export function BotonEliminarPropiedad({ id, titulo }: { id: string; titulo: str
       <button
         type="button"
         onClick={() => dialogRef.current?.showModal()}
-        className="text-sm text-gris-700 underline"
+        className="w-24 rounded border border-negro px-4 py-2 text-center text-sm text-negro"
       >
         Eliminar
       </button>

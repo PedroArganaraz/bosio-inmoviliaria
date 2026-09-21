@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useOptimistic, useState, useTransition } from "react";
 import { cambiarEstadoActiva } from "@/funcionalidades/propiedades/acciones/cambiarEstadoActiva";
 import { construirUrlImagen } from "@/funcionalidades/propiedades/utilidades/construirUrlImagen";
@@ -32,12 +33,8 @@ export function FilaPropiedadAdmin({ propiedad }: { propiedad: PropiedadConPorta
   }
 
   return (
-    <li
-      className={`flex flex-col gap-3 border-b border-gris-200 py-4 sm:flex-row sm:items-center sm:justify-between ${
-        activaOptimista ? "" : "opacity-60"
-      }`}
-    >
-      <div className="flex gap-3 sm:flex-1">
+    <li className="flex flex-col gap-3 border-b border-gris-200 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className={`flex gap-3 sm:flex-1 ${activaOptimista ? "" : "opacity-60"}`}>
         <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded bg-gris-100 sm:h-24 sm:w-24">
           {propiedad.portada ? (
             <Image
@@ -78,7 +75,15 @@ export function FilaPropiedadAdmin({ propiedad }: { propiedad: PropiedadConPorta
             <span className="text-sm">{activaOptimista ? "Activa" : "Inactiva"}</span>
           </div>
 
-          <BotonEliminarPropiedad id={propiedad.id} titulo={propiedad.titulo} />
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/admin/propiedades/${propiedad.id}/editar`}
+              className="w-24 rounded border border-negro px-4 py-2 text-center text-sm text-negro"
+            >
+              Editar
+            </Link>
+            <BotonEliminarPropiedad id={propiedad.id} titulo={propiedad.titulo} />
+          </div>
         </div>
 
         {errorActiva && (

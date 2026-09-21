@@ -1,5 +1,6 @@
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { TipoOperacion, TipoPropiedad, Moneda } from "@/funcionalidades/propiedades/enums";
+import { convertirEnumsPropiedad } from "@/funcionalidades/propiedades/utilidades/convertirEnumsPropiedad";
 import type { Tables } from "@/tipos/baseDeDatos";
 
 export type PropiedadConPortada = Omit<
@@ -26,10 +27,7 @@ export async function listarPropiedadesAdmin(): Promise<PropiedadConPortada[]> {
   }
 
   return data.map(({ imagenesPropiedad, ...propiedad }) => ({
-    ...propiedad,
-    tipoOperacion: propiedad.tipoOperacion as TipoOperacion,
-    tipoPropiedad: propiedad.tipoPropiedad as TipoPropiedad,
-    moneda: propiedad.moneda as Moneda,
+    ...convertirEnumsPropiedad(propiedad),
     portada: elegirPortada(imagenesPropiedad),
   }));
 }

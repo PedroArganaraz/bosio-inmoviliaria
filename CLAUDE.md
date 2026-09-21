@@ -8,7 +8,8 @@ ni usuarios públicos.
 
 ## Stack
 
-- Next.js (App Router) + TypeScript + Tailwind CSS 4.
+- Next.js (App Router) + TypeScript + Tailwind CSS 4 + Zod (validación en
+  Server Actions).
 - Supabase: base de datos, autenticación y Storage. Deploy en Vercel.
 - La base de datos ya existe en Supabase. El SQL de referencia vive en
   `supabase/migrations/` — **no se ejecuta ni se modifica** desde acá; los
@@ -32,10 +33,13 @@ src/
     propiedades/
       enums.ts          # TipoOperacion, TipoPropiedad, Moneda
       consultas/        # lecturas a Supabase (Server Components/acciones)
-      acciones/          # Server Actions (mutaciones)
+      acciones/          # Server Actions (mutaciones) + validarDatosPropiedad
+                          # (esquema Zod compartido por crear/actualizar)
       componentes/       # componentes de UI propios de propiedades
-      utilidades/         # etiquetas, formatearPrecio, construirUrlImagen (se
-                           # reutilizan también en el sitio público)
+      utilidades/         # etiquetas, formatearPrecio, construirUrlImagen,
+                           # slugify, esUuid, convertirEnumsPropiedad,
+                           # valoresFormularioPropiedad — las primeras tres se
+                           # reutilizan también en el sitio público
   lib/
     supabase/
       cliente.ts         # cliente de navegador
