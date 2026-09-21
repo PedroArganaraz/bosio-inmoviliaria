@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+:root {
+  --color-blanco: #ffffff;
+  --color-negro: #0a0a0a;
+  --color-gris-50: #fafafa;
+  --color-gris-100: #f4f4f5;
+  --color-gris-200: #e4e4e7;
+  --color-gris-300: #d4d4d8;
+  --color-gris-400: #a1a1aa;
+  --color-gris-500: #71717a;
+  --color-gris-600: #52525b;
+  --color-gris-700: #3f3f46;
+  --color-gris-800: #27272a;
+  --color-gris-900: #18181b;
+
+  --background: var(--color-blanco);
+  --foreground: var(--color-negro);
+}
+
+@theme inline {
+  --color-blanco: var(--color-blanco);
+  --color-negro: var(--color-negro);
+  --color-gris-50: var(--color-gris-50);
+  --color-gris-100: var(--color-gris-100);
+  --color-gris-200: var(--color-gris-200);
+  --color-gris-300: var(--color-gris-300);
+  --color-gris-400: var(--color-gris-400);
+  --color-gris-500: var(--color-gris-500);
+  --color-gris-600: var(--color-gris-600);
+  --color-gris-700: var(--color-gris-700);
+  --color-gris-800: var(--color-gris-800);
+  --color-gris-900: var(--color-gris-900);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-montserrat);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+}
