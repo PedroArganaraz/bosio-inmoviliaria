@@ -35,7 +35,7 @@ export function BotonEliminarPropiedad({ id, titulo }: { id: string; titulo: str
       <dialog
         ref={dialogRef}
         aria-labelledby="tituloDialogoEliminar"
-        className="w-[calc(100%-2rem)] max-w-sm rounded border border-gris-300 p-6 text-negro backdrop:bg-negro/50"
+        className="m-auto w-[calc(100%-2rem)] max-w-sm rounded border border-gris-300 p-6 text-negro backdrop:bg-negro/50"
       >
         <h2 id="tituloDialogoEliminar" className="text-base font-semibold">
           Eliminar &quot;{titulo}&quot;
@@ -57,7 +57,7 @@ export function BotonEliminarPropiedad({ id, titulo }: { id: string; titulo: str
           <button
             type="button"
             onClick={() => dialogRef.current?.close()}
-            className="rounded px-3 py-2 text-sm"
+            className="rounded border border-negro px-3 py-2 text-sm text-negro"
           >
             Cancelar
           </button>
