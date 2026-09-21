@@ -25,6 +25,9 @@ src/
   configuracion/
     configuracionSitio.ts   # nombre, whatsapp, contacto, redes (placeholders)
   funcionalidades/
+    autenticacion/
+      acciones/          # iniciarSesion, cerrarSesion (Server Actions)
+      componentes/       # FormularioLogin
     propiedades/
       enums.ts          # TipoOperacion, TipoPropiedad, Moneda
       consultas/        # lecturas a Supabase (Server Components/acciones)
@@ -35,6 +38,7 @@ src/
       cliente.ts         # cliente de navegador
       servidor.ts         # cliente para Server Components/Server Actions
       sesion.ts            # refresco de sesión, usado desde proxy.ts
+      autenticacion.ts      # obtenerUsuarioAdmin(), usado en layouts/acciones del admin
   proxy.ts                # (antes "middleware"): refresca la sesión en cada request
   tipos/
     baseDeDatos.ts         # generado con `npm run generarTipos`, no editar a mano
@@ -67,6 +71,9 @@ src/
   vende, y vuelve a `true` cuando se libera.
 - **Planificar antes de implementar:** para cambios no triviales, proponer
   el plan (archivos a tocar, enfoque) antes de escribir código.
+- **Autenticación del admin:** todo layout, página y Server Action del admin
+  debe llamar a `obtenerUsuarioAdmin()` (`src/lib/supabase/autenticacion.ts`)
+  antes de leer o escribir datos. No confiar solo en el proxy.
 
 ## Tipos de la base de datos
 

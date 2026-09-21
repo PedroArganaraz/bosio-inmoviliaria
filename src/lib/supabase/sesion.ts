@@ -26,7 +26,9 @@ export async function refrescarSesion(request: NextRequest) {
     },
   );
 
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  return respuesta;
+  return { respuesta, usuario: user };
 }
