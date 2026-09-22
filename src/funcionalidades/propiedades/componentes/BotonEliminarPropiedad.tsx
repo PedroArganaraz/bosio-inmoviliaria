@@ -2,9 +2,10 @@
 
 import { useRef, useState, useTransition } from "react";
 import { eliminarPropiedad } from "@/funcionalidades/propiedades/acciones/eliminarPropiedad";
+import { DialogConfirmacion, type DialogConfirmacionHandle } from "@/componentes/DialogConfirmacion";
 
 export function BotonEliminarPropiedad({ id, titulo }: { id: string; titulo: string }) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
+  const dialogRef = useRef<DialogConfirmacionHandle>(null);
   const [pendiente, iniciarTransicion] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -18,7 +19,7 @@ export function BotonEliminarPropiedad({ id, titulo }: { id: string; titulo: str
         return;
       }
 
-      dialogRef.current?.close();
+      dialogRef.current?.cerrar();
     });
   }
 
@@ -26,51 +27,21 @@ export function BotonEliminarPropiedad({ id, titulo }: { id: string; titulo: str
     <>
       <button
         type="button"
-        onClick={() => dialogRef.current?.showModal()}
+        onClick={() => dialogRef.current?.abrir()}
         className="w-24 rounded border border-negro px-4 py-2 text-center text-sm text-negro"
       >
         Eliminar
       </button>
 
-      <dialog
+      <DialogConfirmacion
         ref={dialogRef}
-        aria-labelledby="tituloDialogoEliminar"
-        className="m-auto w-[calc(100%-2rem)] max-w-sm rounded border border-gris-300 p-6 text-negro backdrop:bg-negro/50"
-      >
-        <h2 id="tituloDialogoEliminar" className="text-base font-semibold">
-          Eliminar &quot;{titulo}&quot;
-        </h2>
-        <p className="mt-2 text-sm text-gris-700">
-          Esta acción no se puede deshacer. Si solo querés ocultarla, desactivala.
-        </p>
-
-        {error && (
-          <p
-            role="alert"
-            className="mt-3 border-l-4 border-negro bg-gris-100 px-3 py-2 text-sm font-medium text-negro"
-          >
-            {error}
-          </p>
-        )}
-
-        <div className="mt-4 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => dialogRef.current?.close()}
-            className="rounded border border-negro px-3 py-2 text-sm text-negro"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={confirmarEliminacion}
-            disabled={pendiente}
-            className="rounded bg-negro px-3 py-2 text-sm text-blanco disabled:opacity-50"
-          >
-            {pendiente ? "Eliminando..." : "Eliminar"}
-          </button>
-        </div>
-      </dialog>
+        idTitulo="tituloDialogoEliminarPropiedad"
+        titulo={`Eliminar "${titulo}"`}
+        descripcion="Esta acción no se puede deshacer. Si solo querés ocultarla, desactivala."
+        error={error}
+        pendiente={pendiente}
+        onConfirmar={confirmarEliminacion}
+      />
     </>
   );
 }

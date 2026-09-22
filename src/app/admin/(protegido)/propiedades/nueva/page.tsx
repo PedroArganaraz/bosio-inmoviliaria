@@ -17,7 +17,9 @@ export default async function PaginaNuevaPropiedad() {
           ← Volver
         </Link>
       </div>
-      <FormularioPropiedad accion={crearPropiedad} />
+      <FormularioPropiedad accion={crearPropiedad}>
+        <p className="text-sm text-gris-600">Vas a poder cargar las fotos después de guardar.</p>
+      </FormularioPropiedad>
     </div>
   );
 }

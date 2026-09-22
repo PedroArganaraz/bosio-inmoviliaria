@@ -23,7 +23,8 @@ src/
   app/
     (publico)/         # rutas públicas: "/", "/propiedades", "/contacto"
     admin/              # rutas privadas del panel de administración
-  componentes/          # UI genérica compartida entre funcionalidades (ej. Interruptor)
+  componentes/          # UI genérica compartida entre funcionalidades (ej.
+                        # Interruptor, DialogConfirmacion)
   configuracion/
     configuracionSitio.ts   # nombre, whatsapp, contacto, redes (placeholders)
   funcionalidades/
@@ -38,8 +39,9 @@ src/
       componentes/       # componentes de UI propios de propiedades
       utilidades/         # etiquetas, formatearPrecio, construirUrlImagen,
                            # slugify, esUuid, convertirEnumsPropiedad,
-                           # valoresFormularioPropiedad — las primeras tres se
-                           # reutilizan también en el sitio público
+                           # valoresFormularioPropiedad, comprimirImagen (solo
+                           # cliente) — las tres primeras se reutilizan
+                           # también en el sitio público
   lib/
     supabase/
       cliente.ts         # cliente de navegador
@@ -84,6 +86,19 @@ src/
   antes de leer o escribir datos. No confiar solo en el proxy.
 - **Orden determinístico:** todo listado debe tener orden total
   determinístico: criterio principal + desempate por `id`.
+- **Imágenes de propiedades:** se suben directo del navegador al bucket
+  `propiedades` (comprimidas antes de subir); las Server Actions nunca
+  reciben archivos, solo rutas ya subidas.
+- **Portada y orden de fotos:** la portada de una propiedad es la imagen de
+  menor `posicion` en `imagenesPropiedad`; el orden es `posicion` asc,
+  `fechaCreacion` asc, `id` asc.
+- **Borrado de imágenes:** al eliminar una imagen o una propiedad, primero
+  se borran los archivos del bucket y recién después las filas de la base.
+- **Sin `console.log` ni código de depuración en el código final.**
+- **Sin comentarios que solo repitan lo que el código ya dice** (ej. "//
+  suma los valores" sobre una suma). Se admite un comentario corto solo
+  cuando explica una decisión no obvia (ej. por qué el borrado va en cierto
+  orden, por qué cierto valor no puede venir del cliente).
 
 ## Tipos de la base de datos
 

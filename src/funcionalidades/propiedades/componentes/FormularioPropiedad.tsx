@@ -32,9 +32,18 @@ type FormularioPropiedadProps = {
     formData: FormData,
   ) => Promise<EstadoFormularioPropiedad>;
   valoresIniciales?: ValoresFormularioPropiedad;
+  // Se renderiza dentro del <form>, entre "Publicación" y el botón
+  // "Guardar" — así el botón queda siempre al final de todo (ej. debajo
+  // de la sección de fotos en /admin/propiedades/[id]/editar). Ningún
+  // control de ese contenido debe ser type="submit".
+  children?: React.ReactNode;
 };
 
-export function FormularioPropiedad({ accion, valoresIniciales }: FormularioPropiedadProps) {
+export function FormularioPropiedad({
+  accion,
+  valoresIniciales,
+  children,
+}: FormularioPropiedadProps) {
   const [estado, ejecutarAccion, pendiente] = useActionState(accion, {
     ...estadoInicial,
     valores: valoresIniciales ?? valoresFormularioVacios,
@@ -352,6 +361,8 @@ export function FormularioPropiedad({ accion, valoresIniciales }: FormularioProp
         </div>
         <input type="hidden" name="activa" value={activa ? "true" : "false"} />
       </fieldset>
+
+      {children}
 
       {estado.errorGeneral && (
         <p
