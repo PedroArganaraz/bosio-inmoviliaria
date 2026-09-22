@@ -6,29 +6,27 @@ import { obtenerUsuarioAdmin } from "@/lib/supabase/autenticacion";
 import { revalidarSitioPublico } from "@/lib/revalidarSitioPublico";
 import { esUuid } from "@/utilidades/esUuid";
 
-export type ResultadoAccionImagen = {
+export type ResultadoAccionImagenPortada = {
   error: string | null;
 };
 
-export async function reordenarImagenes(
-  propiedadId: string,
+export async function reordenarImagenesPortada(
   idsEnOrden: string[],
-): Promise<ResultadoAccionImagen> {
+): Promise<ResultadoAccionImagenPortada> {
   await obtenerUsuarioAdmin();
 
-  if (!esUuid(propiedadId) || idsEnOrden.some((id) => !esUuid(id))) {
+  if (idsEnOrden.some((id) => !esUuid(id))) {
     return { error: "Datos inválidos." };
   }
 
   const supabase = await crearClienteServidor();
 
   const { data: imagenesActuales, error: errorImagenes } = await supabase
-    .from("imagenesPropiedad")
-    .select("id, rutaArchivo")
-    .eq("propiedadId", propiedadId);
+    .from("imagenesPortada")
+    .select("id, rutaArchivo");
 
   if (errorImagenes || !imagenesActuales) {
-    return { error: "No se pudo reordenar las fotos." };
+    return { error: "No se pudo reordenar las imágenes." };
   }
 
   const idsNuevos = new Set(idsEnOrden);
@@ -38,26 +36,24 @@ export async function reordenarImagenes(
     imagenesActuales.every((imagen) => idsNuevos.has(imagen.id));
 
   if (!coincideConjunto) {
-    return { error: "El orden enviado no coincide con las fotos actuales." };
+    return { error: "El orden enviado no coincide con las imágenes actuales." };
   }
 
   const rutaPorId = new Map(imagenesActuales.map((imagen) => [imagen.id, imagen.rutaArchivo]));
 
   const filas = idsEnOrden.map((id, indice) => ({
     id,
-    propiedadId,
     rutaArchivo: rutaPorId.get(id)!,
     posicion: indice,
   }));
 
-  const { error } = await supabase.from("imagenesPropiedad").upsert(filas, { onConflict: "id" });
+  const { error } = await supabase.from("imagenesPortada").upsert(filas, { onConflict: "id" });
 
   if (error) {
-    return { error: "No se pudo reordenar las fotos." };
+    return { error: "No se pudo reordenar las imágenes." };
   }
 
-  revalidatePath("/admin/propiedades");
-  revalidatePath(`/admin/propiedades/${propiedadId}/editar`);
+  revalidatePath("/admin/portada");
   revalidarSitioPublico();
 
   return { error: null };

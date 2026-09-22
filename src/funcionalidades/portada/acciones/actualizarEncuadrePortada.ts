@@ -6,13 +6,13 @@ import { obtenerUsuarioAdmin } from "@/lib/supabase/autenticacion";
 import { revalidarSitioPublico } from "@/lib/revalidarSitioPublico";
 import { esUuid } from "@/utilidades/esUuid";
 import { esPorcentajeValido } from "@/utilidades/gestionImagenesServidor";
-import type { ResultadoAccionImagen } from "@/funcionalidades/propiedades/acciones/reordenarImagenes";
+import type { ResultadoAccionImagenPortada } from "@/funcionalidades/portada/acciones/reordenarImagenesPortada";
 
-export async function actualizarEncuadreImagen(
+export async function actualizarEncuadrePortada(
   imagenId: string,
   puntoFocalX: number,
   puntoFocalY: number,
-): Promise<ResultadoAccionImagen> {
+): Promise<ResultadoAccionImagenPortada> {
   await obtenerUsuarioAdmin();
 
   if (!esUuid(imagenId) || !esPorcentajeValido(puntoFocalX) || !esPorcentajeValido(puntoFocalY)) {
@@ -22,19 +22,16 @@ export async function actualizarEncuadreImagen(
   const supabase = await crearClienteServidor();
 
   const { data, error } = await supabase
-    .from("imagenesPropiedad")
+    .from("imagenesPortada")
     .update({ puntoFocalX, puntoFocalY })
     .eq("id", imagenId)
-    .select("propiedadId");
+    .select("id");
 
   if (error || !data || data.length !== 1) {
     return { error: "No se pudo guardar el encuadre." };
   }
 
-  const propiedadId = data[0].propiedadId;
-
-  revalidatePath("/admin/propiedades");
-  revalidatePath(`/admin/propiedades/${propiedadId}/editar`);
+  revalidatePath("/admin/portada");
   revalidarSitioPublico();
 
   return { error: null };

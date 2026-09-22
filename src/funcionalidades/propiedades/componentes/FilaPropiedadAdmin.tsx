@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useOptimistic, useState, useTransition } from "react";
 import { cambiarEstadoActiva } from "@/funcionalidades/propiedades/acciones/cambiarEstadoActiva";
-import { construirUrlImagen } from "@/funcionalidades/propiedades/utilidades/construirUrlImagen";
-import { estiloObjectPosition } from "@/funcionalidades/propiedades/utilidades/estiloObjectPosition";
+import { construirUrlImagen } from "@/utilidades/construirUrlImagen";
+import { estiloObjectPosition } from "@/utilidades/estiloObjectPosition";
 import { formatearPrecio } from "@/funcionalidades/propiedades/utilidades/formatearPrecio";
 import {
   etiquetasTipoOperacion,

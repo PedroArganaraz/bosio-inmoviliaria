@@ -10,8 +10,8 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import Image from "next/image";
-import { construirUrlImagen } from "@/funcionalidades/propiedades/utilidades/construirUrlImagen";
-import { actualizarEncuadreImagen } from "@/funcionalidades/propiedades/acciones/actualizarEncuadreImagen";
+import { construirUrlImagen } from "@/utilidades/construirUrlImagen";
+import type { ResultadoAccionImagenGestionable } from "@/componentes/tiposGestionImagenes";
 
 export type AjustarEncuadreImagenHandle = {
   abrir: () => void;
@@ -22,6 +22,12 @@ type AjustarEncuadreImagenProps = {
   rutaArchivo: string;
   puntoFocalXInicial: number;
   puntoFocalYInicial: number;
+  proporcionAspecto: string;
+  accion: (
+    imagenId: string,
+    puntoFocalX: number,
+    puntoFocalY: number,
+  ) => Promise<ResultadoAccionImagenGestionable>;
   onGuardado: (puntoFocalX: number, puntoFocalY: number) => void;
 };
 
@@ -42,7 +48,15 @@ export const AjustarEncuadreImagen = forwardRef<
   AjustarEncuadreImagenHandle,
   AjustarEncuadreImagenProps
 >(function AjustarEncuadreImagen(
-  { imagenId, rutaArchivo, puntoFocalXInicial, puntoFocalYInicial, onGuardado },
+  {
+    imagenId,
+    rutaArchivo,
+    puntoFocalXInicial,
+    puntoFocalYInicial,
+    proporcionAspecto,
+    accion,
+    onGuardado,
+  },
   ref,
 ) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -120,7 +134,7 @@ export const AjustarEncuadreImagen = forwardRef<
     iniciarTransicion(async () => {
       const valorX = Math.round(puntoFocalX);
       const valorY = Math.round(puntoFocalY);
-      const resultado = await actualizarEncuadreImagen(imagenId, valorX, valorY);
+      const resultado = await accion(imagenId, valorX, valorY);
 
       if (resultado.error) {
         setError(resultado.error);
@@ -148,13 +162,14 @@ export const AjustarEncuadreImagen = forwardRef<
       <div
         ref={marcoRef}
         tabIndex={0}
-        aria-label={`Encuadre de la foto. Posición actual: ${Math.round(puntoFocalX)}% horizontal, ${Math.round(puntoFocalY)}% vertical. Usá las flechas del teclado para moverlo.`}
+        aria-label={`Encuadre de la imagen. Posición actual: ${Math.round(puntoFocalX)}% horizontal, ${Math.round(puntoFocalY)}% vertical. Usá las flechas del teclado para moverlo.`}
         onPointerDown={iniciarArrastre}
         onPointerMove={manejarPointerMove}
         onPointerUp={terminarArrastre}
         onPointerCancel={terminarArrastre}
         onKeyDown={manejarTeclado}
-        className="relative mt-4 aspect-[4/3] w-full touch-none overflow-hidden rounded border border-gris-300 focus:outline focus:outline-2 focus:outline-negro"
+        style={{ aspectRatio: proporcionAspecto }}
+        className="relative mt-4 w-full touch-none overflow-hidden rounded border border-gris-300 focus:outline focus:outline-2 focus:outline-negro"
       >
         <Image
           src={construirUrlImagen(rutaArchivo)}

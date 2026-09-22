@@ -23,24 +23,45 @@ src/
   app/
     (publico)/         # rutas públicas: "/", "/propiedades", "/contacto"
     admin/              # rutas privadas del panel de administración
-  componentes/          # UI genérica compartida entre funcionalidades (ej.
-                        # Interruptor, DialogConfirmacion)
+  componentes/          # UI genérica compartida entre funcionalidades: ej.
+                        # Interruptor, DialogConfirmacion, NavegacionAdmin, y
+                        # el trío que gestiona imágenes (fotos de propiedad y
+                        # carrusel de portada comparten esta implementación):
+                        # GestionImagenes (orquestador: subida, dropzone,
+                        # arrastre con manija, límite), ImagenGestionableItem
+                        # (una tarjeta: manija, overlay Editar/Eliminar),
+                        # AjustarEncuadreImagen (modal de punto focal) y
+                        # tiposGestionImagenes.ts (tipos compartidos por los
+                        # tres). Lo que cambia entre usos se pasa por props:
+                        # prefijoRuta, maximo, ladoMaximo, proporcionAspecto,
+                        # textos, y las 4 Server Actions inyectadas
+                        # (registrar/reordenar/eliminar/actualizarEncuadre)
   configuracion/
     configuracionSitio.ts   # nombre, whatsapp, contacto, redes (placeholders)
+    seccionesAdmin.ts        # secciones del menú del admin (etiqueta + ruta);
+                              # agregar una sección nueva es una línea acá
   funcionalidades/
     autenticacion/
       acciones/          # iniciarSesion, cerrarSesion (Server Actions)
       componentes/       # FormularioLogin
+    portada/              # carrusel único (mismo para celular y escritorio)
+                           # de la página de inicio
+      consultas/          # listarImagenesPortada
+      acciones/            # registrarImagenPortada, reordenarImagenesPortada,
+                            # eliminarImagenPortada, actualizarEncuadrePortada
+      componentes/          # GestionPortada: wrapper delgado que configura
+                             # el GestionImagenes compartido para este uso
     propiedades/
       enums.ts          # TipoOperacion, TipoPropiedad, Moneda
       consultas/        # lecturas a Supabase (Server Components/acciones)
       acciones/          # Server Actions (mutaciones) + validarDatosPropiedad
                           # (esquema Zod compartido por crear/actualizar)
-      componentes/       # componentes de UI propios de propiedades
-      utilidades/         # etiquetas, formatearPrecio, construirUrlImagen,
-                           # slugify, esUuid, convertirEnumsPropiedad,
-                           # valoresFormularioPropiedad, comprimirImagen (solo
-                           # cliente) — las tres primeras se reutilizan
+      componentes/       # componentes de UI propios de propiedades;
+                          # FotosPropiedad es el wrapper delgado que configura
+                          # el GestionImagenes compartido para fotos
+      utilidades/         # etiquetas, formatearPrecio, slugify,
+                           # convertirEnumsPropiedad, valoresFormularioPropiedad
+                           # — etiquetas y formatearPrecio se reutilizan
                            # también en el sitio público
   lib/
     supabase/
@@ -52,6 +73,13 @@ src/
   proxy.ts                # (antes "middleware"): refresca la sesión en cada request
   tipos/
     baseDeDatos.ts         # generado con `npm run generarTipos`, no editar a mano
+  utilidades/             # utilidades genéricas compartidas entre
+                           # funcionalidades: esUuid, construirUrlImagen,
+                           # estiloObjectPosition, comprimirImagen (solo
+                           # cliente), gestionImagenesServidor (helpers de
+                           # Server Actions de imágenes: validar ruta/prefijo,
+                           # validar porcentaje 0-100, borrar del bucket con
+                           # mejor esfuerzo)
 ```
 
 ## Convenciones
@@ -86,14 +114,28 @@ src/
   antes de leer o escribir datos. No confiar solo en el proxy.
 - **Orden determinístico:** todo listado debe tener orden total
   determinístico: criterio principal + desempate por `id`.
-- **Imágenes de propiedades:** se suben directo del navegador al bucket
-  `propiedades` (comprimidas antes de subir); las Server Actions nunca
-  reciben archivos, solo rutas ya subidas.
-- **Portada y orden de fotos:** la portada de una propiedad es la imagen de
-  menor `posicion` en `imagenesPropiedad`; el orden es `posicion` asc,
-  `fechaCreacion` asc, `id` asc.
+- **Imágenes (fotos de propiedad y carrusel de portada):** se suben directo
+  del navegador al bucket `propiedades` (comprimidas antes de subir); las
+  Server Actions nunca reciben archivos, solo rutas ya subidas. El carrusel
+  de portada del Inicio es único (mismo para celular y escritorio); sus
+  archivos van en la carpeta `portada/` del mismo bucket, registrados en
+  `imagenesPortada`.
+- **Gestión de imágenes compartida:** el arrastre con manija, el dropzone y
+  el modal de encuadre viven en un único componente
+  (`src/componentes/GestionImagenes.tsx` y su trío), reutilizado por fotos
+  de propiedad y por el carrusel de portada, parametrizado por
+  `prefijoRuta`/`maximo`/`ladoMaximo`/`proporcionAspecto` y las Server
+  Actions inyectadas. No duplicar esta lógica para un uso nuevo: agregar un
+  wrapper delgado que configure el componente compartido.
+- **Portada de una propiedad y orden de fotos:** la portada (miniatura) de
+  una propiedad es la imagen de menor `posicion` en `imagenesPropiedad`; el
+  orden es `posicion` asc, `fechaCreacion` asc, `id` asc. (No confundir con
+  el carrusel de "Portada" del sitio, que es una funcionalidad aparte.)
 - **Borrado de imágenes:** al eliminar una imagen o una propiedad, primero
   se borran los archivos del bucket y recién después las filas de la base.
+- **Secciones del admin:** se definen en un único módulo
+  (`src/configuracion/seccionesAdmin.ts`); agregar una sección nueva al menú
+  es agregar una línea ahí, no tocar el layout.
 - **Sin `console.log` ni código de depuración en el código final.**
 - **Sin comentarios que solo repitan lo que el código ya dice** (ej. "//
   suma los valores" sobre una suma). Se admite un comentario corto solo

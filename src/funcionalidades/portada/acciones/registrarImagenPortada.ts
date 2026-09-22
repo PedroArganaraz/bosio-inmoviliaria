@@ -4,60 +4,43 @@ import { revalidatePath } from "next/cache";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { obtenerUsuarioAdmin } from "@/lib/supabase/autenticacion";
 import { revalidarSitioPublico } from "@/lib/revalidarSitioPublico";
-import { esUuid } from "@/utilidades/esUuid";
 import {
   esRutaImagenValida,
   borrarArchivoMejorEsfuerzo,
 } from "@/utilidades/gestionImagenesServidor";
 import type { Tables } from "@/tipos/baseDeDatos";
 
-const LIMITE_IMAGENES = 30;
+const LIMITE_IMAGENES = 8;
+const PREFIJO_RUTA = "portada";
 
-export type ResultadoRegistrarImagen =
+export type ResultadoRegistrarImagenPortada =
   | { error: string; imagen: null }
-  | { error: null; imagen: Tables<"imagenesPropiedad"> };
+  | { error: null; imagen: Tables<"imagenesPortada"> };
 
-export async function registrarImagen(
-  propiedadId: string,
+export async function registrarImagenPortada(
   rutaArchivo: string,
-): Promise<ResultadoRegistrarImagen> {
+): Promise<ResultadoRegistrarImagenPortada> {
   await obtenerUsuarioAdmin();
 
-  if (!esUuid(propiedadId)) {
-    return { error: "Identificador inválido.", imagen: null };
-  }
-
-  if (!esRutaImagenValida(propiedadId, rutaArchivo)) {
+  if (!esRutaImagenValida(PREFIJO_RUTA, rutaArchivo)) {
     return { error: "Ruta de archivo inválida.", imagen: null };
   }
 
   const supabase = await crearClienteServidor();
 
-  const { data: propiedad, error: errorPropiedad } = await supabase
-    .from("propiedades")
-    .select("id")
-    .eq("id", propiedadId)
-    .maybeSingle();
-
-  if (errorPropiedad || !propiedad) {
-    await borrarArchivoMejorEsfuerzo(supabase, rutaArchivo);
-    return { error: "La propiedad no existe.", imagen: null };
-  }
-
   const { data: imagenesActuales, error: errorImagenes } = await supabase
-    .from("imagenesPropiedad")
-    .select("posicion")
-    .eq("propiedadId", propiedadId);
+    .from("imagenesPortada")
+    .select("posicion");
 
   if (errorImagenes || !imagenesActuales) {
     await borrarArchivoMejorEsfuerzo(supabase, rutaArchivo);
-    return { error: "No se pudo registrar la foto.", imagen: null };
+    return { error: "No se pudo registrar la imagen.", imagen: null };
   }
 
   if (imagenesActuales.length >= LIMITE_IMAGENES) {
     await borrarArchivoMejorEsfuerzo(supabase, rutaArchivo);
     return {
-      error: `Ya hay ${LIMITE_IMAGENES} fotos cargadas, el máximo permitido.`,
+      error: `Ya hay ${LIMITE_IMAGENES} imágenes cargadas, el máximo permitido.`,
       imagen: null,
     };
   }
@@ -68,18 +51,17 @@ export async function registrarImagen(
       : Math.max(...imagenesActuales.map((imagen) => imagen.posicion)) + 1;
 
   const { data: filaInsertada, error: errorInsertar } = await supabase
-    .from("imagenesPropiedad")
-    .insert({ propiedadId, rutaArchivo, posicion })
+    .from("imagenesPortada")
+    .insert({ rutaArchivo, posicion })
     .select()
     .single();
 
   if (errorInsertar || !filaInsertada) {
     await borrarArchivoMejorEsfuerzo(supabase, rutaArchivo);
-    return { error: "No se pudo registrar la foto.", imagen: null };
+    return { error: "No se pudo registrar la imagen.", imagen: null };
   }
 
-  revalidatePath("/admin/propiedades");
-  revalidatePath(`/admin/propiedades/${propiedadId}/editar`);
+  revalidatePath("/admin/portada");
   revalidarSitioPublico();
 
   return { error: null, imagen: filaInsertada };

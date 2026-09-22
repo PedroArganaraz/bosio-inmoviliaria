@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 import { obtenerUsuarioAdmin } from "@/lib/supabase/autenticacion";
 import { revalidarSitioPublico } from "@/lib/revalidarSitioPublico";
-import { esUuid } from "@/funcionalidades/propiedades/utilidades/esUuid";
+import { esUuid } from "@/utilidades/esUuid";
 
 export type ResultadoAccionPropiedad = {
   error: string | null;

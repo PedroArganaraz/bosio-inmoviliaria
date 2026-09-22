@@ -9,15 +9,17 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import Image from "next/image";
-import { construirUrlImagen } from "@/funcionalidades/propiedades/utilidades/construirUrlImagen";
-import { estiloObjectPosition } from "@/funcionalidades/propiedades/utilidades/estiloObjectPosition";
-import { eliminarImagen } from "@/funcionalidades/propiedades/acciones/eliminarImagen";
+import { construirUrlImagen } from "@/utilidades/construirUrlImagen";
+import { estiloObjectPosition } from "@/utilidades/estiloObjectPosition";
 import { DialogConfirmacion, type DialogConfirmacionHandle } from "@/componentes/DialogConfirmacion";
 import {
   AjustarEncuadreImagen,
   type AjustarEncuadreImagenHandle,
-} from "@/funcionalidades/propiedades/componentes/AjustarEncuadreImagen";
-import type { ImagenPropiedad } from "@/funcionalidades/propiedades/consultas/listarImagenesPropiedad";
+} from "@/componentes/AjustarEncuadreImagen";
+import type {
+  ImagenGestionable,
+  ResultadoAccionImagenGestionable,
+} from "@/componentes/tiposGestionImagenes";
 
 export type ManejadoresManija = {
   onPointerDown: (evento: ReactPointerEvent<HTMLButtonElement>) => void;
@@ -40,11 +42,15 @@ function IconoManija() {
   );
 }
 
-type FotoPropiedadItemProps = {
-  imagen: ImagenPropiedad;
+type ImagenGestionableItemProps = {
+  imagen: ImagenGestionable;
   indice: number;
   total: number;
-  esPortada: boolean;
+  esPrimera: boolean;
+  etiquetaPrimera: string | undefined;
+  bordeDestacadoPrimera: boolean;
+  proporcionAspecto: string;
+  nombreItem: string;
   pendienteOrden: boolean;
   arrastrando: boolean;
   order: number;
@@ -53,13 +59,23 @@ type FotoPropiedadItemProps = {
   onMoverConTeclado: (indice: number, direccion: -1 | 1) => void;
   onEliminado: (id: string) => void;
   onEncuadreActualizado: (id: string, puntoFocalX: number, puntoFocalY: number) => void;
+  eliminarAccion: (imagenId: string) => Promise<ResultadoAccionImagenGestionable>;
+  actualizarEncuadreAccion: (
+    imagenId: string,
+    puntoFocalX: number,
+    puntoFocalY: number,
+  ) => Promise<ResultadoAccionImagenGestionable>;
 };
 
-export function FotoPropiedadItem({
+export function ImagenGestionableItem({
   imagen,
   indice,
   total,
-  esPortada,
+  esPrimera,
+  etiquetaPrimera,
+  bordeDestacadoPrimera,
+  proporcionAspecto,
+  nombreItem,
   pendienteOrden,
   arrastrando,
   order,
@@ -68,16 +84,21 @@ export function FotoPropiedadItem({
   onMoverConTeclado,
   onEliminado,
   onEncuadreActualizado,
-}: FotoPropiedadItemProps) {
+  eliminarAccion,
+  actualizarEncuadreAccion,
+}: ImagenGestionableItemProps) {
   const dialogRef = useRef<DialogConfirmacionHandle>(null);
   const dialogEncuadreRef = useRef<AjustarEncuadreImagenHandle>(null);
   const [pendienteEliminar, iniciarTransicionEliminar] = useTransition();
   const [errorEliminar, setErrorEliminar] = useState<string | null>(null);
 
+  const mostrarDestacadoPrimera = esPrimera && bordeDestacadoPrimera;
+  const mostrarEtiquetaPrimera = esPrimera && Boolean(etiquetaPrimera);
+
   function confirmarEliminacion() {
     setErrorEliminar(null);
     iniciarTransicionEliminar(async () => {
-      const resultado = await eliminarImagen(imagen.id);
+      const resultado = await eliminarAccion(imagen.id);
 
       if (resultado.error) {
         setErrorEliminar(resultado.error);
@@ -101,8 +122,9 @@ export function FotoPropiedadItem({
   return (
     <div data-foto-id={imagen.id} style={{ order, ...estiloArrastre }} className="relative">
       <div
-        className={`relative aspect-[4/3] overflow-hidden rounded bg-gris-100 ${
-          esPortada ? "border-2 border-negro" : "border border-gris-300"
+        style={{ aspectRatio: proporcionAspecto }}
+        className={`relative overflow-hidden rounded bg-gris-100 ${
+          mostrarDestacadoPrimera ? "border-2 border-negro" : "border border-gris-300"
         } ${arrastrando ? "scale-105 shadow-xl" : ""}`}
       >
         <Image
@@ -114,16 +136,16 @@ export function FotoPropiedadItem({
           style={estiloObjectPosition(imagen)}
         />
 
-        {esPortada && (
+        {mostrarEtiquetaPrimera && (
           <span className="absolute left-2 top-2 rounded bg-negro px-2 py-1 text-xs font-medium text-blanco">
-            Portada
+            {etiquetaPrimera}
           </span>
         )}
 
         <button
           type="button"
           disabled={pendienteOrden}
-          aria-label={`Reordenar foto ${indice + 1} de ${total}. Arrastrá o usá las flechas para moverla.`}
+          aria-label={`Reordenar ${nombreItem} ${indice + 1} de ${total}. Arrastrá o usá las flechas para moverla.`}
           onKeyDown={manejarTeclado}
           {...manejadoresManija}
           className="absolute right-0 top-0 flex h-11 w-11 touch-none items-center justify-center disabled:opacity-40"
@@ -136,7 +158,7 @@ export function FotoPropiedadItem({
         <div className="absolute inset-x-0 bottom-0 flex divide-x divide-blanco/20 bg-negro/60">
           <button
             type="button"
-            aria-label={`Editar foto ${indice + 1}`}
+            aria-label={`Editar ${nombreItem} ${indice + 1}`}
             onClick={() => dialogEncuadreRef.current?.abrir()}
             className="flex min-h-11 flex-1 cursor-pointer items-center justify-center px-4 text-sm font-medium text-blanco"
           >
@@ -144,7 +166,7 @@ export function FotoPropiedadItem({
           </button>
           <button
             type="button"
-            aria-label={`Eliminar foto ${indice + 1}`}
+            aria-label={`Eliminar ${nombreItem} ${indice + 1}`}
             onClick={() => dialogRef.current?.abrir()}
             className="flex min-h-11 flex-1 cursor-pointer items-center justify-center px-4 text-sm font-medium text-blanco"
           >
@@ -155,9 +177,9 @@ export function FotoPropiedadItem({
 
       <DialogConfirmacion
         ref={dialogRef}
-        idTitulo={`tituloDialogoEliminarFoto-${imagen.id}`}
-        titulo="Eliminar foto"
-        descripcion="Se va a eliminar esta foto. Esta acción no se puede deshacer."
+        idTitulo={`tituloDialogoEliminar-${imagen.id}`}
+        titulo={`Eliminar ${nombreItem}`}
+        descripcion={`Se va a eliminar esta ${nombreItem}. Esta acción no se puede deshacer.`}
         error={errorEliminar}
         pendiente={pendienteEliminar}
         onConfirmar={confirmarEliminacion}
@@ -169,6 +191,8 @@ export function FotoPropiedadItem({
         rutaArchivo={imagen.rutaArchivo}
         puntoFocalXInicial={imagen.puntoFocalX}
         puntoFocalYInicial={imagen.puntoFocalY}
+        proporcionAspecto={proporcionAspecto}
+        accion={actualizarEncuadreAccion}
         onGuardado={(puntoFocalX, puntoFocalY) =>
           onEncuadreActualizado(imagen.id, puntoFocalX, puntoFocalY)
         }

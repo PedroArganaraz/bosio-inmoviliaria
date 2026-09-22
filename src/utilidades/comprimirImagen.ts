@@ -1,5 +1,5 @@
 const TAMANO_MAXIMO_ORIGINAL = 25 * 1024 * 1024;
-const LADO_MAXIMO = 1600;
+const LADO_MAXIMO_DEFECTO = 1600;
 const CALIDAD_WEBP = 0.82;
 const CALIDAD_JPEG = 0.85;
 
@@ -8,7 +8,10 @@ export type ImagenComprimida = {
   extension: "webp" | "jpg";
 };
 
-export async function comprimirImagen(archivo: File): Promise<ImagenComprimida> {
+export async function comprimirImagen(
+  archivo: File,
+  ladoMaximo: number = LADO_MAXIMO_DEFECTO,
+): Promise<ImagenComprimida> {
   if (archivo.size > TAMANO_MAXIMO_ORIGINAL) {
     throw new Error(`No se pudo procesar ${archivo.name}: pesa más de 25 MB.`);
   }
@@ -21,7 +24,7 @@ export async function comprimirImagen(archivo: File): Promise<ImagenComprimida> 
     throw new Error(`No se pudo procesar ${archivo.name}. Probá con una foto JPG o PNG.`);
   }
 
-  const escala = Math.min(1, LADO_MAXIMO / Math.max(bitmap.width, bitmap.height));
+  const escala = Math.min(1, ladoMaximo / Math.max(bitmap.width, bitmap.height));
   const ancho = Math.round(bitmap.width * escala);
   const alto = Math.round(bitmap.height * escala);
 

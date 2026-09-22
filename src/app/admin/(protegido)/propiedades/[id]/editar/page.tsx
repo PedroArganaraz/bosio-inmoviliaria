@@ -7,7 +7,7 @@ import { actualizarPropiedad } from "@/funcionalidades/propiedades/acciones/actu
 import { FormularioPropiedad } from "@/funcionalidades/propiedades/componentes/FormularioPropiedad";
 import { FotosPropiedad } from "@/funcionalidades/propiedades/componentes/FotosPropiedad";
 import { convertirPropiedadAValores } from "@/funcionalidades/propiedades/utilidades/valoresFormularioPropiedad";
-import { esUuid } from "@/funcionalidades/propiedades/utilidades/esUuid";
+import { esUuid } from "@/utilidades/esUuid";
 
 export default async function PaginaEditarPropiedad(
   props: PageProps<"/admin/propiedades/[id]/editar">,

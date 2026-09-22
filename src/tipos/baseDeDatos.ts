@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      imagenesPortada: {
+        Row: {
+          fechaCreacion: string
+          id: string
+          posicion: number
+          puntoFocalX: number
+          puntoFocalY: number
+          rutaArchivo: string
+        }
+        Insert: {
+          fechaCreacion?: string
+          id?: string
+          posicion?: number
+          puntoFocalX?: number
+          puntoFocalY?: number
+          rutaArchivo: string
+        }
+        Update: {
+          fechaCreacion?: string
+          id?: string
+          posicion?: number
+          puntoFocalX?: number
+          puntoFocalY?: number
+          rutaArchivo?: string
+        }
+        Relationships: []
+      }
       imagenesPropiedad: {
         Row: {
           fechaCreacion: string
