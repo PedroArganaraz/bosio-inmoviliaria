@@ -3,6 +3,12 @@ import { TipoOperacion, TipoPropiedad, Moneda } from "@/funcionalidades/propieda
 import { convertirEnumsPropiedad } from "@/funcionalidades/propiedades/utilidades/convertirEnumsPropiedad";
 import type { Tables } from "@/tipos/baseDeDatos";
 
+export type PortadaPropiedad = {
+  rutaArchivo: string;
+  puntoFocalX: number;
+  puntoFocalY: number;
+};
+
 export type PropiedadConPortada = Omit<
   Tables<"propiedades">,
   "tipoOperacion" | "tipoPropiedad" | "moneda"
@@ -10,7 +16,7 @@ export type PropiedadConPortada = Omit<
   tipoOperacion: TipoOperacion;
   tipoPropiedad: TipoPropiedad;
   moneda: Moneda;
-  portada: string | null;
+  portada: PortadaPropiedad | null;
 };
 
 export async function listarPropiedadesAdmin(): Promise<PropiedadConPortada[]> {
@@ -18,7 +24,7 @@ export async function listarPropiedadesAdmin(): Promise<PropiedadConPortada[]> {
 
   const { data, error } = await supabase
     .from("propiedades")
-    .select("*, imagenesPropiedad(rutaArchivo, posicion)")
+    .select("*, imagenesPropiedad(rutaArchivo, posicion, puntoFocalX, puntoFocalY)")
     .order("fechaCreacion", { ascending: false })
     .order("id", { ascending: true });
 
@@ -32,11 +38,20 @@ export async function listarPropiedadesAdmin(): Promise<PropiedadConPortada[]> {
   }));
 }
 
-function elegirPortada(imagenes: { rutaArchivo: string; posicion: number }[]): string | null {
+function elegirPortada(
+  imagenes: (PortadaPropiedad & { posicion: number })[],
+): PortadaPropiedad | null {
   if (imagenes.length === 0) {
     return null;
   }
 
-  return imagenes.reduce((menor, actual) => (actual.posicion < menor.posicion ? actual : menor))
-    .rutaArchivo;
+  const portada = imagenes.reduce((menor, actual) =>
+    actual.posicion < menor.posicion ? actual : menor,
+  );
+
+  return {
+    rutaArchivo: portada.rutaArchivo,
+    puntoFocalX: portada.puntoFocalX,
+    puntoFocalY: portada.puntoFocalY,
+  };
 }

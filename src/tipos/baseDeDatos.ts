@@ -20,6 +20,8 @@ export type Database = {
           id: string
           posicion: number
           propiedadId: string
+          puntoFocalX: number
+          puntoFocalY: number
           rutaArchivo: string
         }
         Insert: {
@@ -27,6 +29,8 @@ export type Database = {
           id?: string
           posicion?: number
           propiedadId: string
+          puntoFocalX?: number
+          puntoFocalY?: number
           rutaArchivo: string
         }
         Update: {
@@ -34,6 +38,8 @@ export type Database = {
           id?: string
           posicion?: number
           propiedadId?: string
+          puntoFocalX?: number
+          puntoFocalY?: number
           rutaArchivo?: string
         }
         Relationships: [

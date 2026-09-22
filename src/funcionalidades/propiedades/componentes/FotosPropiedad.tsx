@@ -253,6 +253,12 @@ export function FotosPropiedad({ propiedadId, imagenesIniciales }: FotosPropieda
     setImagenes((actuales) => actuales.filter((imagen) => imagen.id !== id));
   }
 
+  function actualizarEncuadreLocal(id: string, puntoFocalX: number, puntoFocalY: number) {
+    setImagenes((actuales) =>
+      actuales.map((imagen) => (imagen.id === id ? { ...imagen, puntoFocalX, puntoFocalY } : imagen)),
+    );
+  }
+
   async function procesarArchivosSeleccionados(archivos: File[]) {
     if (archivos.length === 0) {
       return;
@@ -469,6 +475,7 @@ export function FotosPropiedad({ propiedadId, imagenesIniciales }: FotosPropieda
                 manejadoresManija={crearManejadoresManija(imagen.id)}
                 onMoverConTeclado={moverConTeclado}
                 onEliminado={quitarDeLaLista}
+                onEncuadreActualizado={actualizarEncuadreLocal}
               />
             );
           })}

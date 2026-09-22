@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useOptimistic, useState, useTransition } from "react";
 import { cambiarEstadoActiva } from "@/funcionalidades/propiedades/acciones/cambiarEstadoActiva";
 import { construirUrlImagen } from "@/funcionalidades/propiedades/utilidades/construirUrlImagen";
+import { estiloObjectPosition } from "@/funcionalidades/propiedades/utilidades/estiloObjectPosition";
 import { formatearPrecio } from "@/funcionalidades/propiedades/utilidades/formatearPrecio";
 import {
   etiquetasTipoOperacion,
@@ -38,11 +39,12 @@ export function FilaPropiedadAdmin({ propiedad }: { propiedad: PropiedadConPorta
         <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded bg-gris-100 sm:h-24 sm:w-24">
           {propiedad.portada ? (
             <Image
-              src={construirUrlImagen(propiedad.portada)}
+              src={construirUrlImagen(propiedad.portada.rutaArchivo)}
               alt=""
               fill
               sizes="(min-width: 640px) 96px, 80px"
               className="object-cover"
+              style={estiloObjectPosition(propiedad.portada)}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center px-1 text-center text-xs text-gris-500">

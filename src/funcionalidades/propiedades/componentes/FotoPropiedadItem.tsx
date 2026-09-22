@@ -10,8 +10,13 @@ import {
 } from "react";
 import Image from "next/image";
 import { construirUrlImagen } from "@/funcionalidades/propiedades/utilidades/construirUrlImagen";
+import { estiloObjectPosition } from "@/funcionalidades/propiedades/utilidades/estiloObjectPosition";
 import { eliminarImagen } from "@/funcionalidades/propiedades/acciones/eliminarImagen";
 import { DialogConfirmacion, type DialogConfirmacionHandle } from "@/componentes/DialogConfirmacion";
+import {
+  AjustarEncuadreImagen,
+  type AjustarEncuadreImagenHandle,
+} from "@/funcionalidades/propiedades/componentes/AjustarEncuadreImagen";
 import type { ImagenPropiedad } from "@/funcionalidades/propiedades/consultas/listarImagenesPropiedad";
 
 export type ManejadoresManija = {
@@ -47,6 +52,7 @@ type FotoPropiedadItemProps = {
   manejadoresManija: ManejadoresManija;
   onMoverConTeclado: (indice: number, direccion: -1 | 1) => void;
   onEliminado: (id: string) => void;
+  onEncuadreActualizado: (id: string, puntoFocalX: number, puntoFocalY: number) => void;
 };
 
 export function FotoPropiedadItem({
@@ -61,8 +67,10 @@ export function FotoPropiedadItem({
   manejadoresManija,
   onMoverConTeclado,
   onEliminado,
+  onEncuadreActualizado,
 }: FotoPropiedadItemProps) {
   const dialogRef = useRef<DialogConfirmacionHandle>(null);
+  const dialogEncuadreRef = useRef<AjustarEncuadreImagenHandle>(null);
   const [pendienteEliminar, iniciarTransicionEliminar] = useTransition();
   const [errorEliminar, setErrorEliminar] = useState<string | null>(null);
 
@@ -103,6 +111,7 @@ export function FotoPropiedadItem({
           fill
           sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
           className="object-cover"
+          style={estiloObjectPosition(imagen)}
         />
 
         {esPortada && (
@@ -124,12 +133,20 @@ export function FotoPropiedadItem({
           </span>
         </button>
 
-        <div className="absolute inset-x-0 bottom-0 flex justify-end bg-negro/60">
+        <div className="absolute inset-x-0 bottom-0 flex divide-x divide-blanco/20 bg-negro/60">
+          <button
+            type="button"
+            aria-label={`Editar foto ${indice + 1}`}
+            onClick={() => dialogEncuadreRef.current?.abrir()}
+            className="flex min-h-11 flex-1 cursor-pointer items-center justify-center px-4 text-sm font-medium text-blanco"
+          >
+            Editar
+          </button>
           <button
             type="button"
             aria-label={`Eliminar foto ${indice + 1}`}
             onClick={() => dialogRef.current?.abrir()}
-            className="min-h-11 px-4 text-sm font-medium text-blanco"
+            className="flex min-h-11 flex-1 cursor-pointer items-center justify-center px-4 text-sm font-medium text-blanco"
           >
             Eliminar
           </button>
@@ -144,6 +161,17 @@ export function FotoPropiedadItem({
         error={errorEliminar}
         pendiente={pendienteEliminar}
         onConfirmar={confirmarEliminacion}
+      />
+
+      <AjustarEncuadreImagen
+        ref={dialogEncuadreRef}
+        imagenId={imagen.id}
+        rutaArchivo={imagen.rutaArchivo}
+        puntoFocalXInicial={imagen.puntoFocalX}
+        puntoFocalYInicial={imagen.puntoFocalY}
+        onGuardado={(puntoFocalX, puntoFocalY) =>
+          onEncuadreActualizado(imagen.id, puntoFocalX, puntoFocalY)
+        }
       />
     </div>
   );
