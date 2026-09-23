@@ -11,6 +11,11 @@ import {
 } from "react";
 import Image from "next/image";
 import { construirUrlImagen } from "@/utilidades/construirUrlImagen";
+import {
+  MOVIMIENTOS_TECLADO_PUNTO_FOCAL,
+  calcularPuntoFocalArrastrado,
+  limitarPuntoFocal,
+} from "@/utilidades/puntoFocal";
 import type { ResultadoAccionImagenGestionable } from "@/componentes/tiposGestionImagenes";
 
 export type AjustarEncuadreImagenHandle = {
@@ -30,19 +35,6 @@ type AjustarEncuadreImagenProps = {
   ) => Promise<ResultadoAccionImagenGestionable>;
   onGuardado: (puntoFocalX: number, puntoFocalY: number) => void;
 };
-
-const PASO_TECLADO = 5;
-
-const MOVIMIENTOS_TECLADO: Record<string, { x: number; y: number }> = {
-  ArrowLeft: { x: -PASO_TECLADO, y: 0 },
-  ArrowRight: { x: PASO_TECLADO, y: 0 },
-  ArrowUp: { x: 0, y: -PASO_TECLADO },
-  ArrowDown: { x: 0, y: PASO_TECLADO },
-};
-
-function limitar(valor: number): number {
-  return Math.min(100, Math.max(0, valor));
-}
 
 export const AjustarEncuadreImagen = forwardRef<
   AjustarEncuadreImagenHandle,
@@ -98,13 +90,13 @@ export const AjustarEncuadreImagen = forwardRef<
       return;
     }
 
-    // Arrastrar la imagen hacia la izquierda la desplaza a la izquierda:
-    // el punto focal (lo que queda centrado en los recortes) se mueve al
-    // lado contrario del gesto, hacia la parte que se revela.
-    const dx = evento.clientX - inicioPuntero.x;
-    const dy = evento.clientY - inicioPuntero.y;
-    setPuntoFocalX(limitar(inicioFocal.x - (dx / recto.width) * 100));
-    setPuntoFocalY(limitar(inicioFocal.y - (dy / recto.height) * 100));
+    const nuevoFoco = calcularPuntoFocalArrastrado(
+      inicioFocal,
+      { x: evento.clientX - inicioPuntero.x, y: evento.clientY - inicioPuntero.y },
+      recto,
+    );
+    setPuntoFocalX(nuevoFoco.x);
+    setPuntoFocalY(nuevoFoco.y);
   }
 
   function terminarArrastre(evento: ReactPointerEvent<HTMLDivElement>) {
@@ -118,14 +110,14 @@ export const AjustarEncuadreImagen = forwardRef<
   }
 
   function manejarTeclado(evento: KeyboardEvent<HTMLDivElement>) {
-    const movimiento = MOVIMIENTOS_TECLADO[evento.key];
+    const movimiento = MOVIMIENTOS_TECLADO_PUNTO_FOCAL[evento.key];
     if (!movimiento) {
       return;
     }
 
     evento.preventDefault();
-    setPuntoFocalX((actual) => limitar(actual + movimiento.x));
-    setPuntoFocalY((actual) => limitar(actual + movimiento.y));
+    setPuntoFocalX((actual) => limitarPuntoFocal(actual + movimiento.x));
+    setPuntoFocalY((actual) => limitarPuntoFocal(actual + movimiento.y));
   }
 
   function confirmarGuardado() {

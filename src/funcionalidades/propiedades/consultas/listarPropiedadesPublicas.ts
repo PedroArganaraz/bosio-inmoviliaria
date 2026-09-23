@@ -1,27 +1,17 @@
 import { crearClienteServidor } from "@/lib/supabase/servidor";
-import { TipoOperacion, TipoPropiedad, Moneda } from "@/funcionalidades/propiedades/enums";
 import { convertirEnumsPropiedad } from "@/funcionalidades/propiedades/utilidades/convertirEnumsPropiedad";
-import { elegirPortada, type PortadaPropiedad } from "@/funcionalidades/propiedades/utilidades/elegirPortada";
-import type { Tables } from "@/tipos/baseDeDatos";
+import { elegirPortada } from "@/funcionalidades/propiedades/utilidades/elegirPortada";
+import type { PropiedadConPortada } from "@/funcionalidades/propiedades/consultas/listarPropiedadesAdmin";
 
-export type { PortadaPropiedad };
+export type { PropiedadConPortada };
 
-export type PropiedadConPortada = Omit<
-  Tables<"propiedades">,
-  "tipoOperacion" | "tipoPropiedad" | "moneda"
-> & {
-  tipoOperacion: TipoOperacion;
-  tipoPropiedad: TipoPropiedad;
-  moneda: Moneda;
-  portada: PortadaPropiedad | null;
-};
-
-export async function listarPropiedadesAdmin(): Promise<PropiedadConPortada[]> {
+export async function listarPropiedadesPublicas(): Promise<PropiedadConPortada[]> {
   const supabase = await crearClienteServidor();
 
   const { data, error } = await supabase
     .from("propiedades")
     .select("*, imagenesPropiedad(rutaArchivo, posicion, puntoFocalX, puntoFocalY)")
+    .eq("activa", true)
     .order("fechaCreacion", { ascending: false })
     .order("id", { ascending: true });
 

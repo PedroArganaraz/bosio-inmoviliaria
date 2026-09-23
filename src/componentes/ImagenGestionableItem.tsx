@@ -59,6 +59,7 @@ type ImagenGestionableItemProps = {
   onMoverConTeclado: (indice: number, direccion: -1 | 1) => void;
   onEliminado: (id: string) => void;
   onEncuadreActualizado: (id: string, puntoFocalX: number, puntoFocalY: number) => void;
+  mostrarBotonEditarEncuadre: boolean;
   eliminarAccion: (imagenId: string) => Promise<ResultadoAccionImagenGestionable>;
   actualizarEncuadreAccion: (
     imagenId: string,
@@ -84,6 +85,7 @@ export function ImagenGestionableItem({
   onMoverConTeclado,
   onEliminado,
   onEncuadreActualizado,
+  mostrarBotonEditarEncuadre,
   eliminarAccion,
   actualizarEncuadreAccion,
 }: ImagenGestionableItemProps) {
@@ -156,14 +158,16 @@ export function ImagenGestionableItem({
         </button>
 
         <div className="absolute inset-x-0 bottom-0 flex divide-x divide-blanco/20 bg-negro/60">
-          <button
-            type="button"
-            aria-label={`Editar ${nombreItem} ${indice + 1}`}
-            onClick={() => dialogEncuadreRef.current?.abrir()}
-            className="flex min-h-11 flex-1 cursor-pointer items-center justify-center px-4 text-sm font-medium text-blanco"
-          >
-            Editar
-          </button>
+          {mostrarBotonEditarEncuadre && (
+            <button
+              type="button"
+              aria-label={`Editar ${nombreItem} ${indice + 1}`}
+              onClick={() => dialogEncuadreRef.current?.abrir()}
+              className="flex min-h-11 flex-1 cursor-pointer items-center justify-center px-4 text-sm font-medium text-blanco"
+            >
+              Editar
+            </button>
+          )}
           <button
             type="button"
             aria-label={`Eliminar ${nombreItem} ${indice + 1}`}
@@ -179,24 +183,26 @@ export function ImagenGestionableItem({
         ref={dialogRef}
         idTitulo={`tituloDialogoEliminar-${imagen.id}`}
         titulo={`Eliminar ${nombreItem}`}
-        descripcion={`Se va a eliminar esta ${nombreItem}. Esta acción no se puede deshacer.`}
+        descripcion={`Esta acción no se puede deshacer.`}
         error={errorEliminar}
         pendiente={pendienteEliminar}
         onConfirmar={confirmarEliminacion}
       />
 
-      <AjustarEncuadreImagen
-        ref={dialogEncuadreRef}
-        imagenId={imagen.id}
-        rutaArchivo={imagen.rutaArchivo}
-        puntoFocalXInicial={imagen.puntoFocalX}
-        puntoFocalYInicial={imagen.puntoFocalY}
-        proporcionAspecto={proporcionAspecto}
-        accion={actualizarEncuadreAccion}
-        onGuardado={(puntoFocalX, puntoFocalY) =>
-          onEncuadreActualizado(imagen.id, puntoFocalX, puntoFocalY)
-        }
-      />
+      {mostrarBotonEditarEncuadre && (
+        <AjustarEncuadreImagen
+          ref={dialogEncuadreRef}
+          imagenId={imagen.id}
+          rutaArchivo={imagen.rutaArchivo}
+          puntoFocalXInicial={imagen.puntoFocalX}
+          puntoFocalYInicial={imagen.puntoFocalY}
+          proporcionAspecto={proporcionAspecto}
+          accion={actualizarEncuadreAccion}
+          onGuardado={(puntoFocalX, puntoFocalY) =>
+            onEncuadreActualizado(imagen.id, puntoFocalX, puntoFocalY)
+          }
+        />
+      )}
     </div>
   );
 }

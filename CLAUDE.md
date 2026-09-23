@@ -120,6 +120,11 @@ src/
   de portada del Inicio es único (mismo para celular y escritorio); sus
   archivos van en la carpeta `portada/` del mismo bucket, registrados en
   `imagenesPortada`.
+- **Optimizador de imágenes de Vercel:** está desactivado
+  (`images.unoptimized` en `next.config.ts`) a propósito, para evitar el
+  límite de transformaciones del plan gratuito; las imágenes ya llegan
+  comprimidas desde el navegador antes de subirse. No lo reactives sin
+  revisar el plan de Vercel del proyecto.
 - **Gestión de imágenes compartida:** el arrastre con manija, el dropzone y
   el modal de encuadre viven en un único componente
   (`src/componentes/GestionImagenes.tsx` y su trío), reutilizado por fotos
@@ -136,6 +141,22 @@ src/
 - **Secciones del admin:** se definen en un único módulo
   (`src/configuracion/seccionesAdmin.ts`); agregar una sección nueva al menú
   es agregar una línea ahí, no tocar el layout.
+- **Sitio público:** es una única página (`src/app/(publico)/page.tsx`) con
+  secciones ancladas (`#inicio` el carrusel de Portada, `#propiedades` el
+  listado). Las fichas individuales de cada propiedad son rutas propias en
+  `/propiedades/[slug]`, no secciones de esa misma página.
+- **Filtrado del listado público:** es 100% en el cliente (sin ida al
+  servidor en cada cambio de filtro), porque el volumen de propiedades es
+  chico (~5). Los datos ya vienen cargados del Server Component.
+- **Vista previa del carrusel en el admin:** el admin de Portada muestra una
+  vista previa en vivo del carrusel, reutilizando el mismo componente
+  `CarruselPortada` que usa el sitio público (no hay una segunda
+  implementación). El encuadre de las imágenes del carrusel se ajusta
+  arrastrando directo sobre esa vista previa (o con las flechas del
+  teclado), no con un modal: Portada tiene un único contexto de uso real
+  (el carrusel), a diferencia de las fotos de propiedad, que se usan en
+  proporciones distintas según el contexto y por eso siguen usando el modal
+  "Ajustar encuadre".
 - **Sin `console.log` ni código de depuración en el código final.**
 - **Sin comentarios que solo repitan lo que el código ya dice** (ej. "//
   suma los valores" sobre una suma). Se admite un comentario corto solo
