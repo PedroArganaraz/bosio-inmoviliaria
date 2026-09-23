@@ -1,8 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { Interruptor } from "@/componentes/Interruptor";
 import { CampoFormulario } from "@/componentes/CampoFormulario";
+import { MapaUbicacion } from "@/componentes/MapaUbicacion";
+import { configuracionSitio } from "@/configuracion/configuracionSitio";
+import { geocodificarDireccion } from "@/funcionalidades/propiedades/acciones/geocodificarDireccion";
+import { geocodificarInversa } from "@/funcionalidades/propiedades/acciones/geocodificarInversa";
 import { TipoOperacion, TipoPropiedad, Moneda } from "@/funcionalidades/propiedades/enums";
 import {
   etiquetasTipoOperacion,
@@ -19,6 +23,18 @@ const claseInput =
 
 const claseTarjeta = "flex flex-col gap-4 rounded-lg bg-gris-100 p-4 sm:p-6";
 const claseTituloSeccion = "text-base font-semibold";
+
+type Coordenadas = { lat: number; lng: number };
+
+function leerCoordenadas(valores: ValoresFormularioPropiedad): Coordenadas | null {
+  if (valores.latitud === "" || valores.longitud === "") {
+    return null;
+  }
+
+  const lat = Number(valores.latitud);
+  const lng = Number(valores.longitud);
+  return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+}
 
 const estadoInicial: EstadoFormularioPropiedad = {
   valores: valoresFormularioVacios,
@@ -54,6 +70,11 @@ export function FormularioPropiedad({
   );
   const [monedaTocada, setMonedaTocada] = useState(false);
   const [activa, setActiva] = useState(estado.valores.activa);
+  const [coordenadas, setCoordenadas] = useState(() => leerCoordenadas(estado.valores));
+  const [direccion, setDireccion] = useState(estado.valores.direccion);
+  const [barrio, setBarrio] = useState(estado.valores.barrio);
+  const [errorBusqueda, setErrorBusqueda] = useState<string | null>(null);
+  const [buscando, iniciarBusqueda] = useTransition();
 
   // Cada vez que la Server Action devuelve un estado nuevo (éxito o error),
   // los campos controlados se resincronizan con lo que el servidor echoa.
@@ -65,6 +86,45 @@ export function FormularioPropiedad({
     setMoneda(estado.valores.moneda === Moneda.Usd ? Moneda.Usd : Moneda.Ars);
     setMonedaTocada(false);
     setActiva(estado.valores.activa);
+    setCoordenadas(leerCoordenadas(estado.valores));
+    setDireccion(estado.valores.direccion);
+    setBarrio(estado.valores.barrio);
+  }
+
+  const errorUbicacion = estado.errores.latitud ?? estado.errores.longitud;
+
+  function moverPin(lat: number, lng: number) {
+    setCoordenadas({ lat, lng });
+
+    iniciarBusqueda(async () => {
+      const resultado = await geocodificarInversa(lat, lng);
+
+      if ("error" in resultado) {
+        return;
+      }
+
+      if (resultado.direccion !== "") {
+        setDireccion(resultado.direccion);
+      }
+      if (resultado.barrio !== "") {
+        setBarrio(resultado.barrio);
+      }
+    });
+  }
+
+  function buscarEnElMapa() {
+    setErrorBusqueda(null);
+
+    iniciarBusqueda(async () => {
+      const resultado = await geocodificarDireccion(direccion, barrio, configuracionSitio.ciudad);
+
+      if ("error" in resultado) {
+        setErrorBusqueda(resultado.error);
+        return;
+      }
+
+      setCoordenadas(resultado);
+    });
   }
 
   return (
@@ -226,7 +286,8 @@ export function FormularioPropiedad({
               name="direccion"
               type="text"
               maxLength={200}
-              defaultValue={estado.valores.direccion}
+              value={direccion}
+              onChange={(evento) => setDireccion(evento.target.value)}
               aria-invalid={Boolean(estado.errores.direccion)}
               aria-describedby={estado.errores.direccion ? "direccion-error" : undefined}
               className={claseInput}
@@ -239,12 +300,57 @@ export function FormularioPropiedad({
               name="barrio"
               type="text"
               maxLength={100}
-              defaultValue={estado.valores.barrio}
+              value={barrio}
+              onChange={(evento) => setBarrio(evento.target.value)}
               aria-invalid={Boolean(estado.errores.barrio)}
               aria-describedby={estado.errores.barrio ? "barrio-error" : undefined}
               className={claseInput}
             />
           </CampoFormulario>
+
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={buscarEnElMapa}
+              disabled={direccion.trim() === "" || buscando}
+              className="cursor-pointer self-start rounded border border-negro px-4 py-2 text-sm text-negro disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {buscando ? "Buscando…" : "Buscar en el mapa"}
+            </button>
+
+            {errorBusqueda && (
+              <p
+                role="alert"
+                className="border-l-4 border-negro bg-blanco px-3 py-2 text-sm font-medium text-negro"
+              >
+                {errorBusqueda}
+              </p>
+            )}
+
+            {errorUbicacion && (
+              <p
+                role="alert"
+                className="border-l-4 border-negro bg-blanco px-3 py-2 text-sm font-medium text-negro"
+              >
+                {errorUbicacion}
+              </p>
+            )}
+
+            <p className="text-sm text-gris-600">
+              {coordenadas
+                ? "Si el pin no cae exactamente en el lugar correcto, podés arrastrarlo."
+                : "Buscá la dirección para ubicarla en el mapa."}
+            </p>
+            <MapaUbicacion
+              latitud={coordenadas?.lat ?? null}
+              longitud={coordenadas?.lng ?? null}
+              editable
+              onCambiarPosicion={moverPin}
+            />
+
+            <input type="hidden" name="latitud" value={coordenadas ? String(coordenadas.lat) : ""} />
+            <input type="hidden" name="longitud" value={coordenadas ? String(coordenadas.lng) : ""} />
+          </div>
         </fieldset>
       </div>
 

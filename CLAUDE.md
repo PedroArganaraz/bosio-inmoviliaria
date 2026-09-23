@@ -157,6 +157,11 @@ src/
   (el carrusel), a diferencia de las fotos de propiedad, que se usan en
   proporciones distintas según el contexto y por eso siguen usando el modal
   "Ajustar encuadre".
+- **Ubicación en el mapa:** `latitud` y `longitud` nunca se muestran ni se
+  editan como campos numéricos: se cargan por geocodificación de la
+  dirección (Nominatim/OpenStreetMap) y se ajustan arrastrando un pin en
+  `MapaUbicacion`. Ese componente está preparado para reutilizarse en modo
+  no editable en la ficha pública.
 - **Sin `console.log` ni código de depuración en el código final.**
 - **Sin comentarios que solo repitan lo que el código ya dice** (ej. "//
   suma los valores" sobre una suma). Se admite un comentario corto solo

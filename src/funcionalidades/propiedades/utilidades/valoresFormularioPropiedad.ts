@@ -9,6 +9,8 @@ export type ValoresFormularioPropiedad = {
   moneda: string;
   direccion: string;
   barrio: string;
+  latitud: string;
+  longitud: string;
   superficieCubierta: string;
   superficieTotal: string;
   ambientes: string;
@@ -26,6 +28,8 @@ export const valoresFormularioVacios: ValoresFormularioPropiedad = {
   moneda: "",
   direccion: "",
   barrio: "",
+  latitud: "",
+  longitud: "",
   superficieCubierta: "",
   superficieTotal: "",
   ambientes: "",
@@ -43,6 +47,8 @@ type PropiedadParaFormulario = {
   moneda: Moneda;
   direccion: string | null;
   barrio: string | null;
+  latitud: number | null;
+  longitud: number | null;
   superficieCubierta: number | null;
   superficieTotal: number | null;
   ambientes: number | null;
@@ -65,6 +71,8 @@ export function convertirPropiedadAValores(
     moneda: propiedad.moneda,
     direccion: propiedad.direccion ?? "",
     barrio: propiedad.barrio ?? "",
+    latitud: aTexto(propiedad.latitud),
+    longitud: aTexto(propiedad.longitud),
     superficieCubierta: aTexto(propiedad.superficieCubierta),
     superficieTotal: aTexto(propiedad.superficieTotal),
     ambientes: aTexto(propiedad.ambientes),

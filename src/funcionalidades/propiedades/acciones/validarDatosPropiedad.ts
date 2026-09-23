@@ -25,6 +25,10 @@ const esquemaEntero = (max: number) =>
 const esquemaDecimal = (max: number) =>
   z.number({ message: mensajeNumero }).min(0, mensajeNegativo).max(max, `Máximo ${max}.`).nullable();
 
+const esquemaCoordenada = z
+  .number({ message: "La ubicación no es válida. Buscá la dirección de nuevo." })
+  .nullable();
+
 const esquemaTextoOpcional = (max: number) =>
   z.string().max(max, `Máximo ${max} caracteres.`).nullable();
 
@@ -41,6 +45,8 @@ const esquemaPropiedad = z
     moneda: z.enum(Moneda, { message: "Elegí una moneda." }),
     direccion: esquemaTextoOpcional(DIRECCION_MAXIMA),
     barrio: esquemaTextoOpcional(BARRIO_MAXIMO),
+    latitud: esquemaCoordenada,
+    longitud: esquemaCoordenada,
     superficieCubierta: esquemaDecimal(SUPERFICIE_MAXIMA),
     superficieTotal: esquemaDecimal(SUPERFICIE_MAXIMA),
     ambientes: esquemaEntero(CANTIDAD_MAXIMA),
@@ -91,6 +97,8 @@ export function leerValoresFormulario(formData: FormData): ValoresFormularioProp
     moneda: leerCampo(formData, "moneda"),
     direccion: leerCampo(formData, "direccion"),
     barrio: leerCampo(formData, "barrio"),
+    latitud: leerCampo(formData, "latitud"),
+    longitud: leerCampo(formData, "longitud"),
     superficieCubierta: leerCampo(formData, "superficieCubierta"),
     superficieTotal: leerCampo(formData, "superficieTotal"),
     ambientes: leerCampo(formData, "ambientes"),
@@ -114,6 +122,8 @@ export function validarDatosPropiedad(valores: ValoresFormularioPropiedad): Resu
     moneda: valores.moneda,
     direccion: valores.direccion === "" ? null : valores.direccion,
     barrio: valores.barrio === "" ? null : valores.barrio,
+    latitud: aNumeroONulo(valores.latitud),
+    longitud: aNumeroONulo(valores.longitud),
     superficieCubierta: aNumeroONulo(valores.superficieCubierta),
     superficieTotal: aNumeroONulo(valores.superficieTotal),
     ambientes: aNumeroONulo(valores.ambientes),

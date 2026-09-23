@@ -5,6 +5,7 @@ export const configuracionSitio = {
   // Formato internacional sin "+", ej. 5493511234567.
   numeroWhatsapp: "5493510000000",
   direccion: "Dirección a completar, Ciudad, Provincia",
+  ciudad: "Córdoba",
   email: "contacto@bosio-inmobiliaria-placeholder.com",
   redes: {
     instagram: "https://instagram.com/bosio-inmobiliaria-placeholder",
